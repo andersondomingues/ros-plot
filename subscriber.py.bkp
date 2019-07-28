@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+import rospy
+from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
+from datetime import datetime
+from random import random
+from std_msgs.msg import Float32
+
+plt.style.use('ggplot') #use ggplot for more sophisticated visuals
+#plt.axis([0, 10, 0, 1])
+
+eA_data = []
+eB_data = []
+eC_data = []
+eD_data = []
+dt_data = []
+
+figure = plt.figure()
+line,  = plt.plot_date(dt_data, eA_data, '-')
+
+def update(frame):
+    line.set_data(dt_data, eA_data)
+    figure.gca().relim()
+    figure.gca().autoscale_view()
+    return line,
+
+def cbEngineA(data):
+    eA_data.append(data)
+    dt_data.append(datetime.now())
+    rospy.loginfo(rospy.get_caller_id() + ": %f", data.data)
+
+def cbEngineB(data):
+    rospy.loginfo(rospy.get_caller_id() + ": %f", data.data)
+
+def cbEngineC(data):
+    rospy.loginfo(rospy.get_caller_id() + ": %f", data.data)
+
+def cbEngineD(data):
+    rospy.loginfo(rospy.get_caller_id() + ": %f", data.data)
+    
+def listener():
+    rospy.init_node('engine_plotter', anonymous=True)
+    rospy.Subscriber("engineA", Float32, cbEngineA)
+    #rospy.Subscriber("engineB", Float32, cbEngineB)
+    #rospy.Subscriber("engineC", Float32, cbEngineC)
+    #rospy.Subscriber("engineD", Float32, cbEngineD)
+    animation = FuncAnimation(figure, update, interval=200)
+    plt.show()
+    rospy.spin()
+
+if __name__ == '__main__':
+    listener()
+
